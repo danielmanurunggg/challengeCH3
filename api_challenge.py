@@ -48,14 +48,29 @@ def text_processing(s):
     s = _normalization(s)
     return s
 
+def file_processing(df):
+    df['lower'] = df['Tweet'].apply(_toLower)
+    df['remove_punct'] = df['lower'].apply(_remove_punct)
+    df['remove_link'] = df['remove_punct'].apply(_remove_link)
+    df['remove_another'] = df['remove_link'].apply(_remove_another)
+    df['normalization'] = df['remove_another'].apply(_normalization)
+    df['normalization'].to_csv('output.csv', index=False, header=False)
+    dataframe = pd.DataFrame(df['normalization'])
+    result = dataframe.to_json(orient="columns")
+    return result
+
 @app.route("/clean_text/v1", methods=['POST'])
 def text_cleaning():
     s = request.get_json()
     text_clean = text_processing(s['text'])
-    text_tambahan = "USER Ya bani taplak dkk \xf0\x9f\x98\x84\xf0\x9f\x98\x84\xf0\x9f\x98\x84'"
-    hasil = text_processing(text_tambahan)
-    print(hasil)
     return jsonify({"hasil_bersih":text_clean})
+
+@app.route("/cleaning_file/v1", methods=['POST'])
+def file_cleaning():
+    file = request.files['file']
+    df = pd.read_csv(file, encoding=('latin-1'))
+    file_clean = file_processing(df)
+    return jsonify(file_clean)
 
 if __name__ == "__main__":
     app.run(port=1234, debug=True) # debug ==> kode otomatis update ketika ada perubahan
