@@ -4,7 +4,7 @@ import pandas as pd
 
 app = Flask(__name__) # deklarasi Flask
 
-kamus = pd.read_csv('new_kamusalay.csv', names = ['sebelum', 'sesudah'], encoding='latin-1')
+kamus = pd.read_csv('data/new_kamusalay.csv', names = ['sebelum', 'sesudah'], encoding='latin-1')
 
 number = 0
 
