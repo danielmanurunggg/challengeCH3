@@ -1,20 +1,9 @@
 from flask import Flask, request, jsonify
-import re
 import pandas as pd
 import time
 from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file
 
 app = Flask(__name__) # deklarasi Flask
-
-# def _remove_another_file(s):
-#     # s = _encode_text_file(s)
-#     s = _toLower(s)
-#     s = _remove_link(s)
-#     s = _remove_another_text(s)
-#     s = _remove_hastag(s)
-#     s = _remove_punct(s)
-#     s = _remove_space(s)
-#     return s
 
 def text_processing(s):
     s = _toLower(s)
