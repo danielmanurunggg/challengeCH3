@@ -1,76 +1,58 @@
 from flask import Flask, request, jsonify
 import re
 import pandas as pd
+import time
+from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file
 
 app = Flask(__name__) # deklarasi Flask
 
-kamus = pd.read_csv('data/new_kamusalay.csv', names = ['sebelum', 'sesudah'], encoding='latin-1')
-
-number = 0
-
-def _toLower(s):
-    return s.lower()
-
-def _remove_punct(s):
-    return re.sub(r"[^\w\d\s]+", "", s)
-
-def _remove_link(s):
-    return re.sub('((www\.[^\s]+)|(https?://[^\s]+)|(http?://[^\s]+))',' ',s)
-
-def _remove_another(s):
-    s = re.sub(r"rt", "", s)
-    s = re.sub(r"user", "", s)
-    s = (re.sub(r'[^\x00-\x7f]',r'', s))
-    return s
-
-def _normalization(s):
-  global number
-  words = s.split()
-  clear_words = ""
-  for val in words:
-    x = 0
-    for idx, data in enumerate(kamus['sebelum']):
-      if(val == data):
-        clear_words += kamus['sesudah'][idx] + ' '
-        print(number,"Transform :",data,"-",kamus['sesudah'][idx])
-        x = 1
-        number += 1
-        break
-    if(x == 0):
-      clear_words += val + ' '
-  return clear_words
+# def _remove_another_file(s):
+#     # s = _encode_text_file(s)
+#     s = _toLower(s)
+#     s = _remove_link(s)
+#     s = _remove_another_text(s)
+#     s = _remove_hastag(s)
+#     s = _remove_punct(s)
+#     s = _remove_space(s)
+#     return s
 
 def text_processing(s):
     s = _toLower(s)
     s = _remove_link(s)
-    s = _remove_another(s)
+    s = _remove_another_text(s)
+    s = _remove_hastag(s)
     s = _remove_punct(s)
+    s = _remove_space(s)
     s = _normalization(s)
     return s
 
 def file_processing(df):
     df['lower'] = df['Tweet'].apply(_toLower)
-    df['remove_punct'] = df['lower'].apply(_remove_punct)
-    df['remove_link'] = df['remove_punct'].apply(_remove_link)
-    df['remove_another'] = df['remove_link'].apply(_remove_another)
-    df['normalization'] = df['remove_another'].apply(_normalization)
-    df['normalization'].to_csv('output.csv', index=False, header=False)
-    dataframe = pd.DataFrame(df['normalization'])
-    result = dataframe.to_json(orient="columns")
-    return result
+    df['link'] = df['lower'].apply(_remove_link)
+    df['binary'] = df['link'].apply(_remove_another_file)
+    df['hastag'] = df['binary'].apply(_remove_hastag)
+    df['punct'] = df['hastag'].apply(_remove_punct)
+    df['space'] = df['punct'].apply(_remove_space)
+    df['space'].to_csv('output.csv', index=False, header=False)
+    return 
+
+text = "test www.google.com http:asd https: USER Ya bani\ntaplak \n dkk \xf0\x9f\x98\x84\xf0\x9f\x98\x84\xf0\x9f\x98\x84     hahah kalo bgt #jokowi3 ?? saya'"
+hasil = text_processing(text)
+print(hasil)
 
 @app.route("/clean_text/v1", methods=['POST'])
 def text_cleaning():
     s = request.get_json()
     text_clean = text_processing(s['text'])
-    return jsonify({"hasil_bersih":text_clean})
+    return jsonify({"result":text_clean})
 
-@app.route("/cleaning_file/v1", methods=['POST'])
+@app.route("/clean_file/v1", methods=['POST'])
 def file_cleaning():
+    start_time = time.time()
     file = request.files['file']
-    df = pd.read_csv(file, encoding=('latin-1'))
+    df = pd.read_csv(file, encoding=('ISO-8859-1'))
     file_clean = file_processing(df)
-    return jsonify(file_clean)
+    return jsonify({"result":"file berhasil diupload ke database","time_exc":"--- %s seconds ---" % (time.time() - start_time)})
 
 if __name__ == "__main__":
     app.run(port=1234, debug=True) # debug ==> kode otomatis update ketika ada perubahan
