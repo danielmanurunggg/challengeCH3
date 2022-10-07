@@ -2,8 +2,13 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import time
 from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file, _stopword_removal, _stemming
+import sqlite3
+from database import checkTableText, checkTableFile
 
 app = Flask(__name__) # deklarasi Flask
+
+checkTableText()
+checkTableFile()
 
 def text_processing(s):
     s = _toLower(s)
@@ -38,6 +43,10 @@ print(hasil)
 def text_cleaning():
     s = request.get_json()
     text_clean = text_processing(s['text'])
+    conn = sqlite3.connect("binar.db")
+    conn.execute("insert into string (text, clean_text) values (?, ?)",(s['text'], text_clean))
+    conn.commit()
+    conn.close()
     return jsonify({"result":text_clean})
 
 @app.route("/clean_file/v1", methods=['POST'])
