@@ -1,10 +1,34 @@
 import re
 import pandas as pd
 from unidecode import unidecode
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory, StopWordRemover, ArrayDictionary
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+import csv
 
 kamus = pd.read_csv('data/new_kamusalay.csv', names = ['sebelum', 'sesudah'], encoding='latin-1')
 
 number = 0
+
+#Membuat factory dan Melihat kata stop words yang ada di library safari
+factory = StopWordRemoverFactory()
+stopwords = factory.get_stop_words()
+#nambahin stopword jika kurang
+#memasukan data untuk proses normalisasi ke dalam variable bentuk array 1D
+with open('data/stopword.csv', newline='') as csvfile:
+    data_stopword_id = list(csv.reader(csvfile))
+
+data_stopword_id
+stopword_more = [item for sublist in data_stopword_id for item in sublist]
+data_stopwords = stopwords + stopword_more
+dictionary = ArrayDictionary(data_stopwords)
+stopword = StopWordRemover(dictionary)
+
+def _stopword_removal(content):
+  text_add_space = re.sub(r" ","  ",str(content))
+  tweet_remove = stopword.remove(text_add_space)
+  text_remove_space = re.sub(r"  "," ",str(tweet_remove))
+  tweet_clear = text_remove_space.strip()
+  return tweet_clear
 
 def _toLower(s): return s.lower()
 
@@ -57,3 +81,14 @@ def _normalization(s):
     if(x == 0):
       clear_words += val + ' '
   return clear_words
+
+factory = StemmerFactory()
+stemmer = factory.create_stemmer()
+i = 0
+def _stemming(content):
+  global i
+  i +=1
+  stem = stemmer.stem(content)
+  print(i,"Before :", content)
+  print("After :", stem,"\n")
+  return stem
