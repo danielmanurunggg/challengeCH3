@@ -3,7 +3,7 @@ import pandas as pd
 import time
 from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file, _stopword_removal, _stemming
 import sqlite3
-from database import checkTableText, checkTableFile
+from database import checkTableText, checkTableFile, _insertTextString
 
 app = Flask(__name__) # deklarasi Flask
 
@@ -28,12 +28,12 @@ def file_processing(df):
     df['binary'] = df['link'].apply(_remove_another_file)
     df['hastag'] = df['binary'].apply(_remove_hastag)
     df['punct'] = df['hastag'].apply(_remove_punct)
-    df['normalization'] = df['punct'].apply(_normalization)
-    df['stemming'] = df['normalization'].apply(_stemming)
-    df['stopword'] = df['stemming'].apply(_stopword_removal)
-    df['space'] = df['stopword'].apply(_remove_space)
-    df['space'].to_csv('output.csv', index=False, header=False)
-    return 
+    # df['normalization'] = df['punct'].apply(_normalization)
+    # df['stemming'] = df['normalization'].apply(_stemming)
+    # df['stopword'] = df['stemming'].apply(_stopword_removal)
+    # df['space'] = df['stopword'].apply(_remove_space)
+    # df['space'].to_csv('output.csv', index=False, header=False)
+    return df['punct']
 
 text = "test www.google.com http:asd https: USER Ya akan bani\ntaplak \n dkk \xf0\x9f\x98\x84\xf0\x9f\x98\x84\xf0\x9f\x98\x84 membuang  hahah kalo bgt #jokowi3 ?? saya'"
 hasil = text_processing(text)
@@ -43,10 +43,7 @@ print(hasil)
 def text_cleaning():
     s = request.get_json()
     text_clean = text_processing(s['text'])
-    conn = sqlite3.connect("binar.db")
-    conn.execute("insert into string (text, clean_text) values (?, ?)",(s['text'], text_clean))
-    conn.commit()
-    conn.close()
+    _insertTextString(s['text'], text_clean)
     return jsonify({"result":text_clean})
 
 @app.route("/clean_file/v1", methods=['POST'])

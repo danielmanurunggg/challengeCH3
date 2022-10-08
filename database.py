@@ -11,7 +11,7 @@ def checkTableText():
     if c.fetchone()[0]==1 : 
         print('Table text exists.')
     else :
-        conn.execute("CREATE TABLE string (id INTEGER PRIMARY KEY, text varchar (255), clean_text varchar (255));")
+        conn.execute("CREATE TABLE string (text varchar (255), clean_text varchar (255));")
         print('Table text created')
                 
     #commit the changes to db			
@@ -30,7 +30,7 @@ def checkTableFile():
     if c.fetchone()[0]==1 : 
         print('Table file exists.')
     else :
-        conn.execute("CREATE TABLE file (id INTEGER PRIMARY KEY, text varchar (255), clean_text varchar (255));")
+        conn.execute("CREATE TABLE file (text varchar (255), clean_text varchar (255));")
         print('Table file created')
                 
     #commit the changes to db			
@@ -40,6 +40,13 @@ def checkTableFile():
 
 checkTableText()
 checkTableFile()
+
+def _insertTextString(a, b):
+    conn = sqlite3.connect("binar.db")
+    conn.execute("insert into string (text, clean_text) values (?, ?)",(a, b))
+    conn.commit()
+    conn.close()
+    print("Data berhasil disimpan di db sqlite")
 
 # # show databases;
 # conn = sqlite3.connect("binar.db")
