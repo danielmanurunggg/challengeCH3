@@ -33,7 +33,7 @@ def file_processing(df):
     df['space'].to_csv('output.csv', index=False, header=False)
     a = pd.DataFrame(df[['Tweet','space']])
     _insertTextFile(a)
-    return df['punct']
+    # return True
 
 #test funtion for string
 text = "test www.google.com http:asd https: USER Ya akan bani\ntaplak \n dkk \xf0\x9f\x98\x84\xf0\x9f\x98\x84\xf0\x9f\x98\x84 membuang  hahah kalo bgt #jokowi3 ?? saya'"
