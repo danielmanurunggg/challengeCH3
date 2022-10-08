@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import time
 from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file, _stopword_removal, _stemming
-import sqlite3
 from database import checkTableText, checkTableFile, _insertTextString, _insertTextFile
 
 app = Flask(__name__) # deklarasi Flask
