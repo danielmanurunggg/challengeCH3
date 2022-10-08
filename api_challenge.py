@@ -35,6 +35,7 @@ def file_processing(df):
     _insertTextFile(a)
     return df['punct']
 
+#test funtion for string
 text = "test www.google.com http:asd https: USER Ya akan bani\ntaplak \n dkk \xf0\x9f\x98\x84\xf0\x9f\x98\x84\xf0\x9f\x98\x84 membuang  hahah kalo bgt #jokowi3 ?? saya'"
 hasil = text_processing(text)
 print(hasil)
