@@ -1,3 +1,4 @@
+from email import header
 import sqlite3
 
 def checkTableText():
@@ -45,6 +46,13 @@ def _insertTextString(a, b):
     conn = sqlite3.connect("binar.db")
     conn.execute("insert into string (text, clean_text) values (?, ?)",(a, b))
     conn.commit()
+    conn.close()
+    print("Data berhasil disimpan di db sqlite")
+
+def _insertTextFile(a):
+    a.rename(columns={'Tweet': 'text', 'punct': 'clean_text'}, inplace=True)
+    conn = sqlite3.connect('binar.db') 
+    a.to_sql('file', con=conn, index=False, if_exists='append') ## if_exists => replace => bikin tabel baru, menghapus yg lama
     conn.close()
     print("Data berhasil disimpan di db sqlite")
 
