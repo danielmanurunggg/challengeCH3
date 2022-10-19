@@ -1,10 +1,38 @@
 from flask import Flask, request, jsonify
+from flasgger import Swagger, LazyString, LazyJSONEncoder, swag_from
 import pandas as pd
 import time
 from clean_data import _toLower, _remove_punct, _remove_space, _remove_link, _remove_hastag, _normalization, _remove_another_text, _remove_another_file, _stopword_removal, _stemming
 from database import checkTableText, checkTableFile, _insertTextString, _insertTextFile
 
 app = Flask(__name__) # deklarasi Flask
+app.json_encoder = LazyJSONEncoder
+
+swagger_template = dict(
+    info = {
+        'title': LazyString(lambda: 'API TESTER'),
+        'version': LazyString(lambda: '1'),
+        'description': LazyString(lambda: 'API Tester for challenge')
+    },
+    host = LazyString(lambda: request.host)
+)
+
+swagger_config = {
+    "headers":[],
+    "specs": [
+        {
+            "endpoint":"docs",
+            "route":"/docs.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True
+        }
+    ],
+    "static_url_path":"/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/docs/"
+}
+
+swagger = Swagger(app, template=swagger_template,config=swagger_config)
 
 def text_processing(s):
     text = s
@@ -40,14 +68,16 @@ text = "test www.google.com http:asd https: USER Ya akan bani\ntaplak \n dkk \xf
 hasil = text_processing(text)
 print(hasil)
 
-@app.route("/clean_text/v1", methods=['POST'])
+@swag_from("docs/swagger_config_text.yml", methods=['POST'])
+@app.route("/api/v1/text", methods=['POST'])
 def text_cleaning():
     checkTableText()
     s = request.get_json()
     text_clean = text_processing(s['text'])
     return jsonify({"result":text_clean})
 
-@app.route("/clean_file/v1", methods=['POST'])
+@swag_from("docs/swagger_config_file.yml", methods=['POST'])
+@app.route("/api/v1/file", methods=['POST'])
 def file_cleaning():
     checkTableFile()
     start_time = time.time()
