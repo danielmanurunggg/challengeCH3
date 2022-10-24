@@ -59,6 +59,7 @@ def file_processing(df):
     df['stopword'] = df['stemming'].apply(_stopword_removal)
     df['space'] = df['stopword'].apply(_remove_space)
     df['space'].to_csv('output.csv', index=False, header=False)
+    df[['space','HS','Abusive']].to_csv('output2.csv', index=False, header=False)
     a = pd.DataFrame(df[['Tweet','space']])
     _insertTextFile(a)
     # return True
